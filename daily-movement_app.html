@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Movement">
+<title>Daily Movement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --jen: #C97B4B;
+  --jen-light: #F7EDE3;
+  --jen-dark: #8B4E28;
+  --christy: #5B7FA6;
+  --christy-light: #E3EDF7;
+  --christy-dark: #2E5278;
+  --green: #2A7A5E;
+  --green-light: #E0F0EA;
+  --bg: #FAF8F5;
+  --card: #FFFFFF;
+  --text: #1C1A18;
+  --muted: #6B6460;
+  --faint: #AAA5A0;
+  --border: rgba(0,0,0,0.08);
+  --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --accent: var(--jen);
+  --accent-light: var(--jen-light);
+  --accent-dark: var(--jen-dark);
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 3rem;
+}
+
+/* ── PROFILE SELECTION ── */
+.profile-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  background: var(--bg);
+}
+.profile-screen h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--text);
+  margin-bottom: 6px;
+  text-align: center;
+}
+.profile-screen p {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+.profile-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 320px;
+}
+.profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: var(--shadow);
+  -webkit-tap-highlight-color: transparent;
+}
+.profile-btn:active { transform: scale(0.97); }
+.profile-btn.jen { background: var(--jen-light); }
+.profile-btn.christy { background: var(--christy-light); }
+.profile-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-size: 18px; font-weight: 400; color: white;
+  flex-shrink: 0;
+}
+.jen .profile-avatar { background: var(--jen); }
+.christy .profile-avatar { background: var(--christy); }
+.profile-btn-info { text-align: left; }
+.profile-btn-name { font-size: 17px; font-weight: 500; color: var(--text); }
+.profile-btn-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+/* ── MAIN APP ── */
+.app { display: none; max-width: 420px; margin: 0 auto; padding: 0; }
+.app.visible { display: block; }
+
+/* Header */
+.app-header {
+  padding: 1.25rem 1.25rem 0;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.header-left {}
+.date-str { font-size: 11px; color: var(--faint); letter-spacing: 0.04em; margin-bottom: 2px; }
+.app-title {
+  font-family: 'Fraunces', serif;
+  font-size: 26px; font-weight: 300; color: var(--text);
+  line-height: 1.1;
+}
+.profile-pill {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 12px 6px 8px;
+  border-radius: 99px; border: none;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  -webkit-tap-highlight-color: transparent;
+  margin-top: 4px;
+}
+.profile-pill.jen { background: var(--jen-light); color: var(--jen-dark); }
+.profile-pill.christy { background: var(--christy-light); color: var(--christy-dark); }
+.pill-dot { width: 10px; height: 10px; border-radius: 50%; }
+.jen .pill-dot { background: var(--jen); }
+.christy .pill-dot { background: var(--christy); }
+
+/* Progress */
+.progress-wrap { padding: 1rem 1.25rem 0; }
+.progress-track { background: var(--border); border-radius: 99px; height: 4px; }
+.progress-fill { height: 4px; border-radius: 99px; transition: width 0.5s ease; width: 0%; }
+.jen-fill { background: var(--jen); }
+.christy-fill { background: var(--christy); }
+.progress-label { font-size: 12px; color: var(--faint); margin-top: 5px; }
+
+/* Nav tabs */
+.nav { display: flex; gap: 6px; padding: 1.1rem 1.25rem 0; }
+.nav-tab {
+  font-size: 13px; font-weight: 500;
+  padding: 7px 16px; border-radius: 99px;
+  border: 1.5px solid var(--border);
+  background: var(--card); color: var(--muted);
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-tab.active.jen-tab { background: var(--jen); color: white; border-color: var(--jen); }
+.nav-tab.active.christy-tab { background: var(--christy); color: white; border-color: var(--christy); }
+
+/* Panes */
+.pane { display: none; padding: 1.1rem 1.25rem 0; }
+.pane.active { display: block; }
+
+/* Section label */
+.section-label {
+  font-size: 11px; font-weight: 500; color: var(--faint);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+/* Congrats */
+.congrats {
+  background: var(--green-light); border-radius: var(--radius-sm);
+  padding: 12px 14px; margin-bottom: 12px;
+  font-size: 14px; color: var(--green); font-weight: 500;
+  display: none;
+}
+
+/* Anchor cards */
+.anchor-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 10px; cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: opacity 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.anchor-card.done { opacity: 0.5; }
+.check-circle {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1.5px solid var(--border); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.anchor-card.done .check-circle { border-color: transparent; }
+.jen-profile .anchor-card.done .check-circle { background: var(--jen); }
+.christy-profile .anchor-card.done .check-circle { background: var(--christy); }
+.check-icon { display: none; }
+.anchor-card.done .check-icon { display: block; }
+.anchor-info { flex: 1; }
+.anchor-title { font-size: 15px; font-weight: 500; margin-bottom: 3px; }
+.anchor-card.done .anchor-title { text-decoration: line-through; color: var(--muted); }
+.anchor-sub { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.anchor-tag { font-size: 11px; padding: 3px 9px; border-radius: 99px; font-weight: 500; flex-shrink: 0; white-space: nowrap; }
+.tag-daily { background: var(--green-light); color: var(--green); }
+.tag-3x { background: #E6F1FB; color: #185FA5; }
+.tag-2x { background: #EEEDFE; color: #534AB7; }
+
+/* Tip */
+.tip-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  margin-top: 4px; margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+.tip-label { font-size: 11px; font-weight: 500; color: var(--faint); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.tip-text { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+.reset-btn {
+  font-size: 13px; color: var(--faint); background: none;
+  border: none; cursor: pointer; padding: 0;
+  text-decoration: underline; font-family: 'DM Sans', sans-serif;
+  margin-bottom: 1rem;
+}
+
+/* Videos */
+.video-item {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 11px 14px;
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 8px; box-shadow: var(--shadow);
+}
+.video-play {
+  width: 38px; height: 38px; border-radius: 50%;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  text-decoration: none; border: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.jen-profile .video-play { background: var(--jen-light); }
+.christy-profile .video-play { background: var(--christy-light); }
+.play-tri {
+  width: 0; height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  margin-left: 3px;
+}
+.jen-profile .play-tri { border-left: 10px solid var(--jen); }
+.christy-profile .play-tri { border-left: 10px solid var(--christy); }
+.video-info { flex: 1; min-width: 0; }
+.video-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.video-cat { font-size: 12px; color: var(--faint); margin-top: 1px; }
+.video-shared-badge {
+  font-size: 10px; padding: 2px 7px; border-radius: 99px;
+  background: var(--green-light); color: var(--green);
+  font-weight: 500; flex-shrink: 0; white-space: nowrap;
+}
+.video-del {
+  background: none; border: none; cursor: pointer;
+  font-size: 22px; color: var(--faint); padding: 0 4px; line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.empty-msg { font-size: 13px; color: var(--faint); padding: 4px 0 12px; }
+
+/* Shared section */
+.shared-section { margin-top: 1rem; }
+.shared-divider {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 10px;
+}
+.shared-divider-line { flex: 1; height: 1px; background: var(--border); }
+.shared-divider-text { font-size: 11px; color: var(--faint); white-space: nowrap; }
+
+/* Add form */
+.add-form {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+  margin-top: 10px; box-shadow: var(--shadow);
+}
+.add-form-title { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 12px; }
+.add-form input, .add-form select {
+  width: 100%; margin-bottom: 8px; font-size: 15px;
+  padding: 11px 12px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--bg); color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  outline: none; -webkit-appearance: none; appearance: none;
+  transition: border-color 0.15s;
+}
+.add-form input:focus, .add-form select:focus { border-color: var(--accent); }
+.share-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 10px; padding: 10px 12px;
+  background: var(--bg); border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+}
+.share-row input[type=checkbox] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--green); flex-shrink: 0; }
+.share-row-label { font-size: 13px; color: var(--muted); }
+.add-btn {
+  width: 100%; padding: 13px; border-radius: var(--radius-sm);
+  border: none; color: white;
+  font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.jen-profile .add-btn { background: var(--jen); }
+.christy-profile .add-btn { background: var(--christy); }
+.add-btn:active { opacity: 0.85; }
+.err { font-size: 12px; color: #c0392b; margin-bottom: 8px; display: none; }
+</style>
+</head>
+<body>
+
+<!-- PROFILE SELECTION -->
+<div class="profile-screen" id="profileScreen">
+  <h1>Daily Movement</h1>
+  <p>Who's checking in today?</p>
+  <div class="profile-cards">
+    <button class="profile-btn jen" id="btnJen">
+      <div class="profile-avatar">J</div>
+      <div class="profile-btn-info">
+        <div class="profile-btn-name">Jennifer</div>
+        <div class="profile-btn-sub">Your movement plan</div>
+      </div>
+    </button>
+    <button class="profile-btn christy" id="btnChristy">
+      <div class="profile-avatar">C</div>
+      <div class="profile-btn-info">
+        <div class="profile-btn-name">Christy</div>
+        <div class="profile-btn-sub">Your movement plan</div>
+      </div>
+    </button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="mainApp">
+
+  <div class="app-header">
+    <div class="header-left">
+      <div class="date-str" id="dateStr"></div>
+      <div class="app-title">Daily Movement</div>
+    </div>
+    <button class="profile-pill" id="profilePill">
+      <div class="pill-dot"></div>
+      <span id="pillName"></span>
+    </button>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progressBar"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 4 done today</div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-tab active" id="tabCheckin">Check-in</button>
+    <button class="nav-tab" id="tabVideos">My videos</button>
+  </div>
+
+  <!-- CHECK-IN PANE -->
+  <div class="pane active" id="paneCheckin">
+    <div class="congrats" id="congrats">That's everything for today. Well done! 🌿</div>
+    <div class="section-label">Your anchors</div>
+
+    <div class="anchor-card" id="card0">
+      <div class="check-circle"><svg class="check-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="anchor-info"><div class="anchor-title">Morning coffee stretch</div><div class="anchor-sub">While the kettle boils — neck rolls, shoulder circles, calf raises, wrist stretch</div></div>
+      <span class="anchor-tag tag-daily">Daily</span>
+    </div>
+
+    <div class="anchor-card" id="card1">
+      <div class="check-circle"><svg class="check-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="anchor-info"><div class="anchor-title">Movement snacking</div><div class="anchor-sub">Every time you get up — take the slightly longer route</div></div>
+      <span class="anchor-tag tag-daily">Daily</span>
+    </div>
+
+    <div class="anchor-card" id="card2">
+      <div class="check-circle"><svg class="check-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="anchor-info"><div class="anchor-title">10-min outdoor walk</div><div class="anchor-sub">After a meal or coffee — flat route, comfortable pace</div></div>
+      <span class="anchor-tag tag-3x">3× week</span>
+    </div>
+
+    <div class="anchor-card" id="card3">
+      <div class="check-circle"><svg class="check-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="anchor-info"><div class="anchor-title">Gentle stretch session</div><div class="anchor-sub">Before winding down — seated/floor yoga, back and hips</div></div>
+      <span class="anchor-tag tag-2x">2× week</span>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-label">Reminder</div>
+      <div class="tip-text" id="tipText"></div>
+    </div>
+    <button class="reset-btn" id="resetBtn">Reset for today</button>
+  </div>
+
+  <!-- VIDEOS PANE -->
+  <div class="pane" id="paneVideos">
+    <div class="section-label">My videos</div>
+    <div id="myVideoList"></div>
+
+    <div class="shared-section">
+      <div class="shared-divider">
+        <div class="shared-divider-line"></div>
+        <div class="shared-divider-text">Shared with household</div>
+        <div class="shared-divider-line"></div>
+      </div>
+      <div id="sharedVideoList"></div>
+    </div>
+
+    <div class="add-form">
+      <div class="add-form-title">Add a video</div>
+      <input type="url" id="vidUrl" placeholder="Paste YouTube link" autocomplete="off" />
+      <input type="text" id="vidName" placeholder="Label (e.g. 10-min chair yoga)" autocomplete="off" />
+      <select id="vidTag">
+        <option value="Yoga">Yoga</option>
+        <option value="Stretching">Stretching</option>
+        <option value="Morning">Morning</option>
+        <option value="Walk">Walk</option>
+        <option value="Other">Other</option>
+      </select>
+      <label class="share-row">
+        <input type="checkbox" id="vidShare" />
+        <span class="share-row-label">Share with household (visible to both Jennifer &amp; Christy)</span>
+      </label>
+      <div class="err" id="formErr">Please add a link and a label.</div>
+      <button class="add-btn" id="addBtn">Save video</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+var TIPS = [
+  "You don't need to finish everything. Just start with the coffee stretch.",
+  "A 10-min walk after eating helps your blood sugar more than you might think.",
+  "No streaks to protect. Missing a day is fine — just pick up the next anchor.",
+  "The hardest part is starting. Put your shoes on first.",
+  "Movement snacking counts. Every extra step is doing something.",
+  "Your yoga mat should be visible and unrolled — not in a cupboard.",
+  "Gentle movement helps arthritis more than rest does over time."
+];
+
+var currentProfile = null; // 'jen' or 'christy'
+
+function getToday() { return new Date().toISOString().slice(0,10); }
+
+function key(profile, type) { return 'mv_' + profile + '_' + type; }
+
+function loadDone(profile) {
+  try {
+    var r = localStorage.getItem(key(profile,'done'));
+    if(r){ var s=JSON.parse(r); if(s.date===getToday()) return s.done; }
+  } catch(e){}
+  return [false,false,false,false];
+}
+function saveDone(profile, done) {
+  try { localStorage.setItem(key(profile,'done'), JSON.stringify({date:getToday(),done:done})); } catch(e){}
+}
+function loadMyVids(profile) {
+  try { var r=localStorage.getItem(key(profile,'vids')); if(r) return JSON.parse(r); } catch(e){}
+  return [];
+}
+function saveMyVids(profile, vids) {
+  try { localStorage.setItem(key(profile,'vids'), JSON.stringify(vids)); } catch(e){}
+}
+function loadSharedVids() {
+  try { var r=localStorage.getItem('mv_shared_vids'); if(r) return JSON.parse(r); } catch(e){}
+  return [];
+}
+function saveSharedVids(vids) {
+  try { localStorage.setItem('mv_shared_vids', JSON.stringify(vids)); } catch(e){}
+}
+
+var done = [];
+var myVids = [];
+var sharedVids = [];
+
+function setProfileTheme(profile) {
+  var app = document.getElementById('mainApp');
+  app.classList.remove('jen-profile','christy-profile');
+  app.classList.add(profile+'-profile');
+  var pb = document.getElementById('progressBar');
+  pb.classList.remove('jen-fill','christy-fill');
+  pb.classList.add(profile+'-fill');
+  var tabs = document.querySelectorAll('.nav-tab');
+  tabs[0].classList.remove('jen-tab','christy-tab');
+  tabs[1].classList.remove('jen-tab','christy-tab');
+  tabs[0].classList.add(profile+'-tab');
+  tabs[1].classList.add(profile+'-tab');
+  var pill = document.getElementById('profilePill');
+  pill.classList.remove('jen','christy');
+  pill.classList.add(profile);
+  document.getElementById('pillName').textContent = profile==='jen' ? 'Jennifer' : 'Christy';
+}
+
+function render() {
+  var count = 0;
+  for(var i=0;i<4;i++){
+    var c = document.getElementById('card'+i);
+    if(done[i]){ c.classList.add('done'); count++; } else { c.classList.remove('done'); }
+  }
+  var pct = Math.round(count/4*100);
+  document.getElementById('progressBar').style.width = pct+'%';
+  document.getElementById('progressLabel').textContent = count+' of 4 done today';
+  document.getElementById('congrats').style.display = count===4 ? 'block' : 'none';
+}
+
+function makeVideoHTML(v, idx, isShared) {
+  var delBtn = isShared
+    ? '<button class="video-del" data-shared="1" data-i="'+idx+'">×</button>'
+    : '<button class="video-del" data-shared="0" data-i="'+idx+'">×</button>';
+  var badge = isShared ? '<span class="video-shared-badge">Shared</span>' : '';
+  return '<div class="video-item">'
+    + '<a class="video-play" href="'+v.url+'" target="_blank" rel="noopener"><div class="play-tri"></div></a>'
+    + '<div class="video-info"><div class="video-name">'+v.name+'</div><div class="video-cat">'+v.tag+'</div></div>'
+    + badge + delBtn
+    + '</div>';
+}
+
+function renderVids() {
+  var myList = document.getElementById('myVideoList');
+  var shList = document.getElementById('sharedVideoList');
+
+  if(myVids.length===0){
+    myList.innerHTML = '<div class="empty-msg">No personal videos yet.</div>';
+  } else {
+    var html='';
+    for(var i=0;i<myVids.length;i++) html += makeVideoHTML(myVids[i], i, false);
+    myList.innerHTML = html;
+  }
+
+  if(sharedVids.length===0){
+    shList.innerHTML = '<div class="empty-msg">No shared videos yet. Add one below and tick "Share".</div>';
+  } else {
+    var html2='';
+    for(var j=0;j<sharedVids.length;j++) html2 += makeVideoHTML(sharedVids[j], j, true);
+    shList.innerHTML = html2;
+  }
+
+  // Wire up delete buttons
+  var dels = document.querySelectorAll('.video-del');
+  for(var k=0;k<dels.length;k++){
+    dels[k].addEventListener('click', function(){
+      var idx = parseInt(this.getAttribute('data-i'));
+      var isShared = this.getAttribute('data-shared')==='1';
+      if(isShared){ sharedVids.splice(idx,1); saveSharedVids(sharedVids); }
+      else { myVids.splice(idx,1); saveMyVids(currentProfile, myVids); }
+      renderVids();
+    });
+  }
+}
+
+function switchTab(tab) {
+  var checkin = tab==='checkin';
+  document.getElementById('tabCheckin').classList.toggle('active', checkin);
+  document.getElementById('tabVideos').classList.toggle('active', !checkin);
+  document.getElementById('paneCheckin').classList.toggle('active', checkin);
+  document.getElementById('paneVideos').classList.toggle('active', !checkin);
+  if(!checkin) renderVids();
+}
+
+function launchProfile(profile) {
+  currentProfile = profile;
+  done = loadDone(profile);
+  myVids = loadMyVids(profile);
+  sharedVids = loadSharedVids();
+
+  document.getElementById('profileScreen').style.display = 'none';
+  var app = document.getElementById('mainApp');
+  app.classList.add('visible');
+
+  setProfileTheme(profile);
+
+  var d = new Date();
+  document.getElementById('dateStr').textContent = d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('tipText').textContent = TIPS[d.getDay() % TIPS.length];
+
+  // reset to check-in tab
+  switchTab('checkin');
+  render();
+}
+
+// ── Event listeners ──
+document.getElementById('btnJen').addEventListener('click', function(){ launchProfile('jen'); });
+document.getElementById('btnChristy').addEventListener('click', function(){ launchProfile('christy'); });
+
+document.getElementById('profilePill').addEventListener('click', function(){
+  document.getElementById('mainApp').classList.remove('visible');
+  document.getElementById('profileScreen').style.display = 'flex';
+});
+
+document.getElementById('tabCheckin').addEventListener('click', function(){ switchTab('checkin'); });
+document.getElementById('tabVideos').addEventListener('click', function(){ switchTab('videos'); });
+
+document.getElementById('card0').addEventListener('click', function(){ done[0]=!done[0]; saveDone(currentProfile,done); render(); });
+document.getElementById('card1').addEventListener('click', function(){ done[1]=!done[1]; saveDone(currentProfile,done); render(); });
+document.getElementById('card2').addEventListener('click', function(){ done[2]=!done[2]; saveDone(currentProfile,done); render(); });
+document.getElementById('card3').addEventListener('click', function(){ done[3]=!done[3]; saveDone(currentProfile,done); render(); });
+
+document.getElementById('resetBtn').addEventListener('click', function(){
+  done=[false,false,false,false]; saveDone(currentProfile,done); render();
+});
+
+document.getElementById('addBtn').addEventListener('click', function(){
+  var url = document.getElementById('vidUrl').value.trim();
+  var name = document.getElementById('vidName').value.trim();
+  var tag = document.getElementById('vidTag').value;
+  var share = document.getElementById('vidShare').checked;
+  var err = document.getElementById('formErr');
+  if(!url||!name){ err.style.display='block'; return; }
+  err.style.display='none';
+  var vid = {url:url, name:name, tag:tag, addedBy: currentProfile==='jen'?'Jennifer':'Christy'};
+  if(share){ sharedVids.push(vid); saveSharedVids(sharedVids); }
+  else { myVids.push(vid); saveMyVids(currentProfile, myVids); }
+  document.getElementById('vidUrl').value='';
+  document.getElementById('vidName').value='';
+  document.getElementById('vidShare').checked=false;
+  renderVids();
+});
+</script>
+</body>
+</html>
