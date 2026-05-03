@@ -263,6 +263,13 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+.vid-group-label {
+  font-size: 11px; font-weight: 600; color: var(--faint);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin: 14px 0 6px;
+}
+.vid-group-label:first-child { margin-top: 0; }
+
 .empty-msg { font-size: 13px; color: var(--faint); padding: 4px 0 12px; }
 
 /* Shared section */
@@ -509,41 +516,53 @@ function render() {
   document.getElementById('congrats').style.display = count===4 ? 'block' : 'none';
 }
 
+var CATEGORY_ORDER = ['Yoga','Stretching','Morning','Walk','Other'];
+
 function makeVideoHTML(v, idx, isShared) {
-  var delBtn = isShared
-    ? '<button class="video-del" data-shared="1" data-i="'+idx+'">×</button>'
-    : '<button class="video-del" data-shared="0" data-i="'+idx+'">×</button>';
+  var delBtn = '<button class="video-del" data-shared="'+(isShared?'1':'0')+'" data-i="'+idx+'">×</button>';
   var badge = isShared ? '<span class="video-shared-badge">Shared</span>' : '';
   return '<div class="video-item">'
     + '<a class="video-play" href="'+v.url+'" target="_blank" rel="noopener"><div class="play-tri"></div></a>'
-    + '<div class="video-info"><div class="video-name">'+v.name+'</div><div class="video-cat">'+v.tag+'</div></div>'
+    + '<div class="video-info"><div class="video-name">'+v.name+'</div></div>'
     + badge + delBtn
     + '</div>';
+}
+
+function renderGrouped(vids, isShared, container) {
+  if(vids.length === 0) {
+    container.innerHTML = isShared
+      ? '<div class="empty-msg">No shared videos yet. Add one below and tick "Share".</div>'
+      : '<div class="empty-msg">No personal videos yet.</div>';
+    return;
+  }
+  // Group by category
+  var groups = {};
+  for(var i=0; i<vids.length; i++){
+    var tag = vids[i].tag || 'Other';
+    if(!groups[tag]) groups[tag] = [];
+    groups[tag].push({vid: vids[i], idx: i});
+  }
+  var html = '';
+  for(var c=0; c<CATEGORY_ORDER.length; c++){
+    var cat = CATEGORY_ORDER[c];
+    if(!groups[cat]) continue;
+    html += '<div class="vid-group-label">'+cat+'</div>';
+    for(var j=0; j<groups[cat].length; j++){
+      html += makeVideoHTML(groups[cat][j].vid, groups[cat][j].idx, isShared);
+    }
+  }
+  container.innerHTML = html;
 }
 
 function renderVids() {
   var myList = document.getElementById('myVideoList');
   var shList = document.getElementById('sharedVideoList');
-
-  if(myVids.length===0){
-    myList.innerHTML = '<div class="empty-msg">No personal videos yet.</div>';
-  } else {
-    var html='';
-    for(var i=0;i<myVids.length;i++) html += makeVideoHTML(myVids[i], i, false);
-    myList.innerHTML = html;
-  }
-
-  if(sharedVids.length===0){
-    shList.innerHTML = '<div class="empty-msg">No shared videos yet. Add one below and tick "Share".</div>';
-  } else {
-    var html2='';
-    for(var j=0;j<sharedVids.length;j++) html2 += makeVideoHTML(sharedVids[j], j, true);
-    shList.innerHTML = html2;
-  }
+  renderGrouped(myVids, false, myList);
+  renderGrouped(sharedVids, true, shList);
 
   // Wire up delete buttons
   var dels = document.querySelectorAll('.video-del');
-  for(var k=0;k<dels.length;k++){
+  for(var k=0; k<dels.length; k++){
     dels[k].addEventListener('click', function(){
       var idx = parseInt(this.getAttribute('data-i'));
       var isShared = this.getAttribute('data-shared')==='1';
