@@ -208,6 +208,7 @@ body {
 .tag-daily { background: var(--green-light); color: var(--green); }
 .tag-3x { background: #E6F1FB; color: #185FA5; }
 .tag-2x { background: #EEEDFE; color: #534AB7; }
+.tag-4x { background: #FEF0ED; color: #A83A1E; }
 
 /* Tip */
 .tip-card {
@@ -397,6 +398,12 @@ body {
       <span class="anchor-tag tag-2x">2× week</span>
     </div>
 
+    <div class="anchor-card" id="card4">
+      <div class="check-circle"><svg class="check-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="anchor-info"><div class="anchor-title">Weights or daytime yoga</div><div class="anchor-sub">Your choice — lift weights or follow a daytime yoga session</div></div>
+      <span class="anchor-tag tag-4x">4× week</span>
+    </div>
+
     <div class="tip-card">
       <div class="tip-label">Reminder</div>
       <div class="tip-text" id="tipText"></div>
@@ -462,7 +469,7 @@ function loadDone(profile) {
     var r = localStorage.getItem(key(profile,'done'));
     if(r){ var s=JSON.parse(r); if(s.date===getToday()) return s.done; }
   } catch(e){}
-  return [false,false,false,false];
+  return [false,false,false,false,false];
 }
 function saveDone(profile, done) {
   try { localStorage.setItem(key(profile,'done'), JSON.stringify({date:getToday(),done:done})); } catch(e){}
@@ -506,14 +513,14 @@ function setProfileTheme(profile) {
 
 function render() {
   var count = 0;
-  for(var i=0;i<4;i++){
+  for(var i=0;i<5;i++){
     var c = document.getElementById('card'+i);
     if(done[i]){ c.classList.add('done'); count++; } else { c.classList.remove('done'); }
   }
-  var pct = Math.round(count/4*100);
+  var pct = Math.round(count/5*100);
   document.getElementById('progressBar').style.width = pct+'%';
-  document.getElementById('progressLabel').textContent = count+' of 4 done today';
-  document.getElementById('congrats').style.display = count===4 ? 'block' : 'none';
+  document.getElementById('progressLabel').textContent = count+' of 5 done today';
+  document.getElementById('congrats').style.display = count===5 ? 'block' : 'none';
 }
 
 var CATEGORY_ORDER = ['Yoga','Stretching','Morning','Walk','Other'];
@@ -619,9 +626,10 @@ document.getElementById('card0').addEventListener('click', function(){ done[0]=!
 document.getElementById('card1').addEventListener('click', function(){ done[1]=!done[1]; saveDone(currentProfile,done); render(); });
 document.getElementById('card2').addEventListener('click', function(){ done[2]=!done[2]; saveDone(currentProfile,done); render(); });
 document.getElementById('card3').addEventListener('click', function(){ done[3]=!done[3]; saveDone(currentProfile,done); render(); });
+document.getElementById('card4').addEventListener('click', function(){ done[4]=!done[4]; saveDone(currentProfile,done); render(); });
 
 document.getElementById('resetBtn').addEventListener('click', function(){
-  done=[false,false,false,false]; saveDone(currentProfile,done); render();
+  done=[false,false,false,false,false]; saveDone(currentProfile,done); render();
 });
 
 document.getElementById('addBtn').addEventListener('click', function(){
